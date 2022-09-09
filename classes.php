@@ -2,12 +2,12 @@
 
 class DOC
 {
-    public static $CLOSEDTAGS = ["br"];
+    public static $CLOSEDTAGS = ["br", "link"];
 
     public static function openTAG($name, $attributes = '', ...$body)
     {
         if (in_array($name, self::$CLOSEDTAGS)) {
-            return sprintf("<%s />", $name);
+            return sprintf("<%s%s >\n", $name, $attributes);
         }
         return sprintf(($name == "html" ? '' : "\n\n") . "<%s%s>%s</%s>" . ($name == "html" ? '' : "\n\n"), $name, $attributes, implode('', $body), $name);
     }
@@ -36,6 +36,16 @@ class DOC
     {
         return self::openTAG("script", $attributes, ...$body);
     }
+
+    public static function openDIV($attributes = '', ...$body)
+    {
+        return self::openTAG("div", $attributes, ...$body);
+    }
+    public static function openBUTTON($attributes = '', ...$body)
+    {
+        return self::openTAG("button", $attributes, ...$body);
+    }
+
 }
 
 class Attributes
@@ -78,19 +88,65 @@ class Attributes
     }
 }
 
-class STYLE{
+class STYLE
+{
     public $styles;
-    public function addAttr($name,$value){
-        $this->styles .= $name . " : " .$value . ";";
+
+    public function addAttr($name, $value)
+    {
+        $this->styles .= $name . " : " . $value . ";";
     }
-    public function padding($value = '',...$custom){
-        if (empty($value)){
-            $value = implode(' ',$custom);
-        }
-        $this->addAttr(__FUNCTION__,$value);
+
+    public function padding(...$value)
+    {
+        $this->addAttr(__FUNCTION__, implode(' ', $value));
         return $this;
     }
-    public function get(){
+
+    public function get()
+    {
         return $this->styles;
     }
+}
+
+class CLASSES
+{
+    private $classes = '';
+
+    public function addClass($name)
+    {
+        $this->classes .= $name . ' ';
+        return $this;
+    }
+
+    public function get()
+    {
+        $result = $this->classes;
+        $this->classes = '';
+        return $result;
+    }
+
+    private function replace_name($name)
+    {
+        return str_replace('_', '-', $name);
+    }
+
+    public function btn()
+    {
+        $this->addClass(__FUNCTION__);
+        return $this;
+    }
+
+    public function btn_primary()
+    {
+        $this->addClass(str_replace('_', '-', __FUNCTION__));
+        return $this;
+    }
+
+    public function btn_danger()
+    {
+        $this->addClass($this->replace_name(__FUNCTION__));
+        return $this;
+    }
+
 }
